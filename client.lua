@@ -97,29 +97,54 @@ CreateThread(function()
         local sleep = 50
         local playerCoords = GetEntityCoords(PlayerPedId())
         local playerData = QBCore.Functions.GetPlayerData()
-        local playerJob = playerData.job.name
+        
+        -- Check if playerData and job are available
+        if playerData and playerData.job then
+            local playerJob = playerData.job.name
 
-        if playerJob == "police" or playerJob == "ambulance" then
-            -- Handle spawn locations
-            for _, location in ipairs(spawnLocations) do
-                local distance = Vdist(playerCoords, location.coords)
-                if distance < 100.0 then
-                    sleep = 0
-                    drawMarker(location.coords, location.color, location.markerHeight or 1.0) -- Use the marker height from the config
+            if playerJob == "police" or playerJob == "ambulance" then
+                -- Handle spawn locations
+                for _, location in ipairs(spawnLocations) do
+                    local distance = Vdist(playerCoords, location.coords)
+                    if distance < 100.0 then
+                        sleep = 0
+                        drawMarker(location.coords, location.color, location.markerHeight or 1.0) -- Use the marker height from the config
 
-                    if distance < 2.0 then
-                        local menuText = playerJob == "police" and '[~b~E~w~] Open Car Menu' or '[~g~E~w~] Open Ambulance Menu'
-                        drawText3D(location.coords.x, location.coords.y, location.coords.z, menuText)
-                        if IsControlJustReleased(0, 38) then
-                            if playerJob == "police" then
-                                openCarMenu(location)
-                            else
-                                openAmbulanceMenu(location)
+                        if distance < 2.0 then
+                            local menuText = playerJob == "police" and '[~b~E~w~] Open Car Menu' or '[~g~E~w~] Open Ambulance Menu'
+                            drawText3D(location.coords.x, location.coords.y, location.coords.z, menuText)
+                            if IsControlJustReleased(0, 38) then
+                                if playerJob == "police" then
+                                    openCarMenu(location)
+                                else
+                                    openAmbulanceMenu(location)
+                                end
+                            end
+                        end
+                    end
+                end
+
+                -- Handle delete locations
+                for _, location in ipairs(deleteLocations) do
+                    local distance = Vdist(playerCoords, location.coords)
+                    if distance < 500.0 then
+                        sleep = 0
+                        drawMarker(location.coords, location.color)
+
+                        if distance < 1.5 then
+                            drawText3D(location.coords.x, location.coords.y, location.coords.z, '[~r~E~w~] Delete Vehicle')
+                            if IsControlJustReleased(0, 38) then
+                                deleteVehicleMenu()
                             end
                         end
                     end
                 end
             end
+        end
+
+        Wait(sleep)
+    end
+end
 
             -- Handle delete locations
             for _, location in ipairs(deleteLocations) do
