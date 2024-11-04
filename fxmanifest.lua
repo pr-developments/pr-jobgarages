@@ -14,6 +14,3 @@ shared_script '@ox_lib/init.lua'
 shared_script 'config.lua'
 
 client_script 'client.lua'
-
-`JOIN THE DISCORD
-`https://discord.gg/4P9YsxKRdp`
