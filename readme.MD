@@ -1,4 +1,4 @@
-Must either be esx or qbcore
+Must either be qbcore
 
 CHANGE VEHICLE SPAWN CODES TO UR VEHICLE SPAWN CODES
 
