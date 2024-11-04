@@ -1,10 +1,4 @@
 local QBCore = exports['qb-core']:GetCoreObject() -- Get QBCore object reference
-local ESX = nil
-
--- Initialize ESX
-TriggerEvent('esx:getSharedObject', function(obj) 
-    ESX = obj 
-end)
 
 local spawnLocations = Config.SpawnLocations -- For vehicle spawning
 local deleteLocations = Config.DeleteLocations -- For vehicle deletion
@@ -89,10 +83,8 @@ local function deleteVehicleMenu()
         SetEntityAsMissionEntity(vehicle, true, true)
         DeleteVehicle(vehicle)
         QBCore.Functions.Notify("Your vehicle has been deleted", "success")
-        ESX.ShowNotification("Your vehicle has been deleted") -- ESX notification
     else
         QBCore.Functions.Notify("You are not in a vehicle", "error")
-        ESX.ShowNotification("You are not in a vehicle") -- ESX notification
     end
 end
 
