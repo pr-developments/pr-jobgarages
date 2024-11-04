@@ -1,4 +1,11 @@
 local QBCore = exports['qb-core']:GetCoreObject() -- Get QBCore object reference
+local ESX = nil
+
+-- Initialize ESX
+TriggerEvent('esx:getSharedObject', function(obj) 
+    ESX = obj 
+end)
+
 local spawnLocations = Config.SpawnLocations -- For vehicle spawning
 local deleteLocations = Config.DeleteLocations -- For vehicle deletion
 
@@ -22,6 +29,16 @@ local function drawText3D(x, y, z, text)
     ClearDrawOrigin()
 end
 
+local function spawnVehicle(model, location)
+    local playerPed = PlayerPedId()
+    RequestModel(model)
+    while not HasModelLoaded(model) do Wait(100) end
+    local vehicle = CreateVehicle(model, location.vehicleSpawn.x, location.vehicleSpawn.y, location.vehicleSpawn.z, location.heading, true, false)
+    TaskWarpPedIntoVehicle(playerPed, vehicle, -1)
+    SetModelAsNoLongerNeeded(model)
+    QBCore.Functions.Notify("You have spawned a " .. model, "success")
+end
+
 local function openCarMenu(location)
     local carOptions = {}
     local playerData = QBCore.Functions.GetPlayerData()
@@ -33,14 +50,7 @@ local function openCarMenu(location)
             carOptions[#carOptions + 1] = {
                 title = car.label,
                 onSelect = function()
-                    local playerPed = PlayerPedId()
-                    local model = GetHashKey(car.model)
-                    RequestModel(model)
-                    while not HasModelLoaded(model) do Wait(100) end
-                    local vehicle = CreateVehicle(model, location.vehicleSpawn.x, location.vehicleSpawn.y, location.vehicleSpawn.z, location.heading, true, false)
-                    TaskWarpPedIntoVehicle(playerPed, vehicle, -1)
-                    SetModelAsNoLongerNeeded(model)
-                    QBCore.Functions.Notify("You have spawned a " .. car.label, "success")
+                    spawnVehicle(car.model, location)
                 end
             }
         end
@@ -61,14 +71,7 @@ local function openAmbulanceMenu(location)
             ambulanceOptions[#ambulanceOptions + 1] = {
                 title = ambulance.label,
                 onSelect = function()
-                    local playerPed = PlayerPedId()
-                    local model = GetHashKey(ambulance.model)
-                    RequestModel(model)
-                    while not HasModelLoaded(model) do Wait(100) end
-                    local vehicle = CreateVehicle(model, location.vehicleSpawn.x, location.vehicleSpawn.y, location.vehicleSpawn.z, location.heading, true, false)
-                    TaskWarpPedIntoVehicle(playerPed, vehicle, -1)
-                    SetModelAsNoLongerNeeded(model)
-                    QBCore.Functions.Notify("You have spawned an " .. ambulance.label, "success")
+                    spawnVehicle(ambulance.model, location)
                 end
             }
         end
@@ -86,8 +89,10 @@ local function deleteVehicleMenu()
         SetEntityAsMissionEntity(vehicle, true, true)
         DeleteVehicle(vehicle)
         QBCore.Functions.Notify("Your vehicle has been deleted", "success")
+        ESX.ShowNotification("Your vehicle has been deleted") -- ESX notification
     else
         QBCore.Functions.Notify("You are not in a vehicle", "error")
+        ESX.ShowNotification("You are not in a vehicle") -- ESX notification
     end
 end
 
@@ -97,7 +102,7 @@ CreateThread(function()
         local sleep = 50
         local playerCoords = GetEntityCoords(PlayerPedId())
         local playerData = QBCore.Functions.GetPlayerData()
-        
+
         -- Check if playerData and job are available
         if playerData and playerData.job then
             local playerJob = playerData.job.name
@@ -122,7 +127,7 @@ CreateThread(function()
                             end
                         end
                     end
-                end
+                end -- End of spawn locations handling
 
                 -- Handle delete locations
                 for _, location in ipairs(deleteLocations) do
@@ -138,31 +143,10 @@ CreateThread(function()
                             end
                         end
                     end
-                end
-            end
-        end
+                end -- End of delete locations handling
+            end -- End of job check
+        end -- End of playerData check
 
         Wait(sleep)
     end
-end
-
-            -- Handle delete locations
-            for _, location in ipairs(deleteLocations) do
-                local distance = Vdist(playerCoords, location.coords)
-                if distance < 500.0 then
-                    sleep = 0
-                    drawMarker(location.coords, location.color)
-
-                    if distance < 1.5 then
-                        drawText3D(location.coords.x, location.coords.y, location.coords.z, '[~r~E~w~] Delete Vehicle')
-                        if IsControlJustReleased(0, 38) then
-                            deleteVehicleMenu()
-                        end
-                    end
-                end
-            end
-        end
-
-        Wait(sleep)
-    end
-end)
+end) -- End of CreateThread
