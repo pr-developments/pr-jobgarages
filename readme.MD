@@ -1,4 +1,4 @@
-Must either be qbcore
+Must be qbcore
 
 CHANGE VEHICLE SPAWN CODES TO UR VEHICLE SPAWN CODES
 
