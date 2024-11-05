@@ -6,7 +6,7 @@ local deleteLocations = Config.DeleteLocations -- For vehicle deletion
 -- Function to draw markers with configurable height
 local function drawMarker(coords, color, height)
     local markerHeight = height or 1.0 -- Use provided height or default to 1.0 if nil
-    DrawMarker(27, coords.x, coords.y, coords.z - markerHeight, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.5, 1.5, markerHeight, color.r, color.g, color.b, 100, false, true, 2, true, nil, nil, false)
+    DrawMarker(36, coords.x, coords.y, coords.z - 0.2, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.5, 0.5, 1.0, color.r, color.g, color.b, 100, false, true, 2, true, nil, nil, false)
 end
 
 -- Function to draw 3D text
