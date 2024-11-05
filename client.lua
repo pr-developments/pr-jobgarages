@@ -28,9 +28,31 @@ local function spawnVehicle(model, location)
     RequestModel(model)
     while not HasModelLoaded(model) do Wait(100) end
     local vehicle = CreateVehicle(model, location.vehicleSpawn.x, location.vehicleSpawn.y, location.vehicleSpawn.z, location.heading, true, false)
+
+    -- Generate and set a random plate
+    local randomPlate = "POL " .. tostring(math.random(0, 999)) -- Format your plate as needed
+    SetVehicleNumberPlateText(vehicle, randomPlate)
+
+    -- Apply vehicle extras and livery from Config
+    if Config.VehicleSettings[model] then
+        local settings = Config.VehicleSettings[model]
+
+        -- Set the extras
+        if settings.extras then
+            for extraIndex, isEnabled in pairs(settings.extras) do
+                SetVehicleExtra(vehicle, tonumber(extraIndex), not isEnabled) -- Enable/disable based on config
+            end
+        end
+
+        -- Set the livery if specified
+        if settings.livery then
+            SetVehicleLivery(vehicle, settings.livery)
+        end
+    end
+
     TaskWarpPedIntoVehicle(playerPed, vehicle, -1)
     SetModelAsNoLongerNeeded(model)
-    QBCore.Functions.Notify("You have spawned a " .. model, "success")
+    QBCore.Functions.Notify("You have spawned a " .. model .. " with plate: " .. randomPlate, "success")
 end
 
 local function openCarMenu(location)
@@ -54,6 +76,53 @@ local function openCarMenu(location)
     lib.showContext('car_spawn_menu')
 end
 
+local function spawnAmbulance(model, location)
+    local playerPed = PlayerPedId()
+    RequestModel(model)
+
+    -- Wait for the model to load
+    while not HasModelLoaded(model) do 
+        Wait(100) 
+    end
+
+    -- Create the vehicle
+    local vehicle = CreateVehicle(model, location.vehicleSpawn.x, location.vehicleSpawn.y, location.vehicleSpawn.z, location.heading or 0, true, false)
+
+    -- Check if the vehicle was created successfully
+    if DoesEntityExist(vehicle) then
+        -- Generate and set a random plate
+        local randomPlate = "AMB " .. string.format("%03d", math.random(0, 999)) -- Format the plate to always be three digits
+        SetVehicleNumberPlateText(vehicle, randomPlate)
+
+        -- Optionally log the plate to the console for debugging
+        print("Spawned vehicle with plate: " .. randomPlate)
+
+        -- Apply vehicle extras and livery from Config
+        if Config.VehicleSettings[model] then
+            local settings = Config.VehicleSettings[model]
+
+            -- Set the extras
+            if settings.extras then
+                for extraIndex, isEnabled in pairs(settings.extras) do
+                    SetVehicleExtra(vehicle, tonumber(extraIndex), not isEnabled) -- Enable/disable based on config
+                end
+            end
+
+            -- Set the livery if specified
+            if settings.livery then
+                SetVehicleLivery(vehicle, settings.livery)
+            end
+        end
+
+        -- Warp player into vehicle
+        TaskWarpPedIntoVehicle(playerPed, vehicle, -1)
+        SetModelAsNoLongerNeeded(model)
+        QBCore.Functions.Notify("You have spawned a vehicle with plate: " .. randomPlate, "success")
+    else
+        QBCore.Functions.Notify("Failed to spawn the vehicle.", "error")
+    end
+end
+
 local function openAmbulanceMenu(location)
     local ambulanceOptions = {}
     local playerData = QBCore.Functions.GetPlayerData()
@@ -65,7 +134,7 @@ local function openAmbulanceMenu(location)
             ambulanceOptions[#ambulanceOptions + 1] = {
                 title = ambulance.label,
                 onSelect = function()
-                    spawnVehicle(ambulance.model, location)
+                    spawnAmbulance(ambulance.model, location) -- Call the new spawnAmbulance function
                 end
             }
         end
@@ -74,6 +143,7 @@ local function openAmbulanceMenu(location)
     lib.registerContext({ id = 'ambulance_spawn_menu', title = 'Choose an Ambulance', options = ambulanceOptions })
     lib.showContext('ambulance_spawn_menu')
 end
+
 
 local function deleteVehicleMenu()
     local playerPed = PlayerPedId()
