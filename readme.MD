@@ -1,4 +1,8 @@
-Must be qbcore
+Supported
+qb-vehiclekeys
+
+Dependencies
+ox_lib
 
 CHANGE VEHICLE SPAWN CODES TO UR VEHICLE SPAWN CODES
 
